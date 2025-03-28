@@ -1,3 +1,11 @@
+/*
+Manages the state needed to specify vertex data for rendering.
+Specifies the layout of vertex data (e.g., positions, colors) using vertex attribute pointers.
+
+VAO and VBO work together to manage and provide vertex data to the GPU.
+The VAO stores the state of vertex attribute pointers, while the VBO stores the actual vertex data.
+*/
+
 #include"VAO.h"
 
 // Constructor that generates a VAO ID

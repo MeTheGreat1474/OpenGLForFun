@@ -1,3 +1,12 @@
+/*
+Contains the main function and sets up the OpenGL context, shaders, and rendering loop.
+Initializes the OpenGL context and libraries (e.g., GLFW, GLEW).
+Compiles and links vertex and fragment shaders.
+Creates and configures VAOs and VBOs with vertex data.
+Continuously renders frames, handling input, error and updating the scene.
+Cleans up resources (e.g., shaders, VAOs, VBOs) before exiting.
+*/
+
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>	
@@ -97,6 +106,12 @@ int main() {
 
 
 	/*
+		talks w/ the GL uniform variables that talks with shaders
+	*/
+	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
+
+
+	/*
 		main loop of our program
 	*/
 	//only close window when 'X' button is pressed
@@ -112,6 +127,10 @@ int main() {
 
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
+
+		//to give the uniID a value
+		//must be after activate
+		glUniform1f(uniID, 0.5f);
 
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();

@@ -1,3 +1,8 @@
+/*
+ Manages the indices used to specify the order in which vertices are drawn.
+ Uploads index data to the GPU.
+*/
+
 #include"EBO.h"
 
 // Constructor that generates a Elements Buffer Object and links it to indices

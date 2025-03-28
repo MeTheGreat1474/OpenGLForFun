@@ -1,3 +1,11 @@
+/*
+Stores vertex data in GPU memory.
+Uploads vertex data (e.g., positions, colors) to the GPU.
+
+VAO and VBO work together to manage and provide vertex data to the GPU.
+The VAO stores the state of vertex attribute pointers, while the VBO stores the actual vertex data.
+*/
+
 #include"VBO.h"
 
 // Constructor that generates a Vertex Buffer Object and links it to vertices
