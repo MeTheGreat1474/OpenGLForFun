@@ -11,14 +11,18 @@ which then determines the final pixel color.
 
 #version 330 core
 
-//Positions/Coordinates
+// Positions/Coordinates
 layout (location = 0) in vec3 aPos;
 // Colors
 layout (location = 1) in vec3 aColor;
+// Texture
+layout (location = 2) in vec2 aTex;
 
 
-// Outputs the color for the Fragment Shader
+// Outputs the color and tex coord for the Fragment Shader
 out vec3 color;
+
+out vec2 texCoord;
 
 //dont define uniform if u dont use it
 // Controls the scale of the vertices
@@ -32,4 +36,5 @@ void main()
 
 	// Assigns the colors from the Vertex Data to "color"
 	color = aColor;
+	texCoord = aTex;
 }

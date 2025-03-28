@@ -10,6 +10,7 @@ Cleans up resources (e.g., shaders, VAOs, VBOs) before exiting.
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>	
+#include<stb/stb_image.h>
 
 #include"shaderClass.h"
 #include"VAO.h"
@@ -25,24 +26,33 @@ Cleans up resources (e.g., shaders, VAOs, VBOs) before exiting.
 //special float for GL compatibility
 //specify coords, each represent 3 point(x,y,z) in vertices
 //opengl will auto interpolate color gradient
+//specify how we want to map the texture on the vertices (higher than 1 cause tiling)
 //Vertices coordinates
 GLfloat vertices[] =
-{ //               COORDINATES					/     COLORS				//
-	-0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.8f, 0.6f,  0.04f,	// Lower left corner
-	 0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.71f, 0.59f,  0.84f,  // Lower right corner
-	 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f,     0.71f, 0.59f,  0.84f,  // Upper corner
-	-0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f,     0.2f, 0.71f, 0.67f,	// Inner left
-	 0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f,     0.71f, 0.59f,  0.84f,  // Inner right
-	 0.0f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.2f, 0.71f, 0.67f		// Inner down
+{ //     COORDINATES     /        COLORS      /
+	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f,// Lower left corner
+	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f,// Upper left corner
+	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   1.0f, 1.0f,// Upper right corner
+	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f // Lower right corner
 };
 
+//triangle
+//GLfloat vertices[] =
+//{ //               COORDINATES					/     COLORS				//
+//	-0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.8f, 0.6f,  0.04f,	// Lower left corner
+//	 0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.71f, 0.59f,  0.84f,  // Lower right corner
+//	 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f,     0.71f, 0.59f,  0.84f,  // Upper corner
+//	-0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f,     0.2f, 0.71f, 0.67f,	// Inner left
+//	 0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f,     0.71f, 0.59f,  0.84f,  // Inner right
+//	 0.0f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f,     0.2f, 0.71f, 0.67f		// Inner down
+//};
 
-//tell openGL to draw 3 points together to form a triangle in the order specified here
+
+//tell openGL to draw 3 points together to form a triangle faces in the order specified here
 GLuint indices[] =
 {
-	0, 3, 5,	//lower left triangle
-	3, 2, 4,	//lower right triangle
-	5, 4, 1		//upper triangle
+	0, 2, 1,	//upper triangle face
+	0, 3, 2		//lower triangle face
 };
 
 int main() {
@@ -94,9 +104,10 @@ int main() {
 		tells opengl how to read vbo
 	*/
 
-	// Links VBO attributes such as coordinates and colors to VAO
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Links VBO attributes such as coordinates, colors, texture to VAO
+	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
 	// Unbind all to prevent accidentally modifying them
 	// unbind EBO after unbind VAO
@@ -112,7 +123,68 @@ int main() {
 
 
 	/*
-		main loop of our program
+		image handling block.
+		First define the properties and store the image,
+		Then we assign the texture into a texture unit (slots of texture in a texture bundle, 16 each)
+		which allow fragment shader to work w/ the textures in the bundle at the same time,
+		Then we set the parameter of the picture that we want,
+		Then generate the texture, its mipmap and delete image data
+	*/
+	//defining height, width in pixels and color channel of an image
+	int widthImg, heightImg, numColCh;
+
+	//storing image in array of byte
+	unsigned char* bytes = stbi_load("chad kilau.jpg", &widthImg, &heightImg, &numColCh, 0);
+
+	GLuint textures;
+
+	//generate the texture object (num of texture, pointer)
+	//remember to delete at the end
+	glGenTextures(1, &textures);
+
+	//to bind textures into a texture unit in a bundle
+	//by making a bundle active and bind it
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textures);
+
+	//changing the filter of our texture to linear
+	//modify the parameter of the texture (type, the parameter of the tex, the value we want to set)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	//changing the tiling of our texture
+	//S is for x-axis and T for y-axis
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//if you want to set 'clamp to border' mus also add this border color
+	// float flatColor = {1.0f, 1.0f, 1.0f, 1.0f};
+	// glTextParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatColor);
+
+	//generaste the texture
+	// type of tex, 0, color channel type we want, width, height, *legacy code, color channel of our image, 
+	// data type of our pixel, image data
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heightImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
+
+	//generate mipmap (smaller res of the image)
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	//to delete the texture since we already convert image data into texture
+	//and unbind the texture
+	stbi_image_free(bytes);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//fetch our texture uniform, activate our shader program
+	//and assign the uniform the index of our texture bundle, 0
+	GLuint tex0uni = glGetUniformLocation(shaderProgram.ID, "tex0");
+	shaderProgram.Activate();
+	glUniform1i(tex0uni, 0);
+
+
+
+
+	/*
+		Main loop of our program
 	*/
 	//only close window when 'X' button is pressed
 	while (!glfwWindowShouldClose(window)) 
@@ -131,6 +203,9 @@ int main() {
 		//to give the uniID a value
 		//must be after activate
 		glUniform1f(uniID, 0.5f);
+
+		//bind the texture object
+		glBindTexture(GL_TEXTURE_2D, textures);
 
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
@@ -151,6 +226,7 @@ int main() {
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
+	glDeleteTextures(1, &textures);
 	shaderProgram.Delete();
 	glfwDestroyWindow(window);
 	glfwTerminate();
