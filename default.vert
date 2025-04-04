@@ -21,18 +21,25 @@ layout (location = 2) in vec2 aTex;
 
 // Outputs the color and tex coord for the Fragment Shader
 out vec3 color;
-
 out vec2 texCoord;
 
 //dont define uniform if u dont use it
 // Controls the scale of the vertices
 uniform float scale;
 
+//import matrices into the vertex shader
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 proj;
+
 
 void main()
 {
 	// Outputs the positions/coordinates + scales of all vertices
-	gl_Position = vec4(aPos.x + aPos.x * scale, aPos.y + aPos.y * scale, aPos.z + aPos.z * scale, 1.0);
+	// gl_Position = vec4(aPos.x + aPos.x * scale, aPos.y + aPos.y * scale, aPos.z + aPos.z * scale, 1.0);
+	// use for 3d
+	gl_Position = proj * view * model * vec4(aPos, 1.0);
+
 
 	// Assigns the colors from the Vertex Data to "color"
 	color = aColor;

@@ -157,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="C:\Users\Ahmad Taufiq\Pictures\Saved Pictures\chad kilau.jpg" />
+    <Image Include="C:\Users\Ahmad Taufiq\Pictures\Saved Pictures\towa.jpeg" />
     <Image Include="pop_cat.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

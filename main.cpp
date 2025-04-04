@@ -11,6 +11,8 @@ Cleans up resources (e.g., shaders, VAOs, VBOs) before exiting.
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>	
 #include<stb/stb_image.h>
+#include<glm/gtc/matrix_transform.hpp>
+#include<glm/gtc/type_ptr.hpp>
 
 #include"shaderClass.h"
 #include"VAO.h"
@@ -19,6 +21,8 @@ Cleans up resources (e.g., shaders, VAOs, VBOs) before exiting.
 
 //think shaders as function for GPU
 
+const unsigned int width = 800;
+const unsigned int height= 800;
 
 /*
 	make vertices
@@ -29,12 +33,23 @@ Cleans up resources (e.g., shaders, VAOs, VBOs) before exiting.
 //specify how we want to map the texture on the vertices (higher than 1 cause tiling)
 //Vertices coordinates
 GLfloat vertices[] =
-{ //     COORDINATES     /        COLORS      /
-	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f,// Lower left corner
-	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f,// Upper left corner
-	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   1.0f, 1.0f,// Upper right corner
-	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f // Lower right corner
+{ //     COORDINATES     /        COLORS      /   TexCoord  //
+	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+	-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+	 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+	 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+	 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
 };
+
+
+
+//GLfloat vertices[] =
+//{ //     COORDINATES     /        COLORS      /		TexCoord
+//	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f,// Lower left corner
+//	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f,// Upper left corner
+//	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   1.0f, 1.0f,// Upper right corner
+//	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f // Lower right corner
+//};
 
 //triangle
 //GLfloat vertices[] =
@@ -51,9 +66,20 @@ GLfloat vertices[] =
 //tell openGL to draw 3 points together to form a triangle faces in the order specified here
 GLuint indices[] =
 {
-	0, 2, 1,	//upper triangle face
-	0, 3, 2		//lower triangle faces
+	0, 1, 2,
+	0, 2, 3,
+	0, 1, 4,
+	1, 2, 4,
+	2, 3, 4,
+	3, 0, 4
 };
+
+//GLuint indices[] =
+//{
+//	0, 2, 1,	//upper triangle face
+//	0, 3, 2		//lower triangle faces
+//};
+
 
 int main() {
 
@@ -65,7 +91,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//windows param(height, width, title, FullScreen, not important), check if null and request to use window
-	GLFWwindow* window = glfwCreateWindow(800, 800, "OpenGLForFun", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "OpenGLForFun", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Fail to create Window" << std::endl;
 		glfwTerminate();
@@ -75,7 +101,7 @@ int main() {
 
 	gladLoadGL();
 
-	glViewport(0, 0, 800, 800);
+	glViewport(0, 0, width, height);
 
 
 	/*
@@ -136,7 +162,7 @@ int main() {
 	stbi_set_flip_vertically_on_load(true);
 
 	//storing image in array of byte
-	unsigned char* bytes = stbi_load("chad kilau.jpg", &widthImg, &heightImg, &numColCh, 0);
+	unsigned char* bytes = stbi_load("towa.jpeg", &widthImg, &heightImg, &numColCh, 0);
 
 	GLuint textures;
 
@@ -202,6 +228,40 @@ int main() {
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
 
+
+		/*
+			For 3d projection
+
+			local coord + (model matrix) -> world coord + (view matrix) ->
+			view coord + (proj matrix) -> clip coord -> screen coord
+
+			set the variable matrix equal to an identity matrix bcz OG matrix is zero matrix
+			set all matrix use for transformation,
+			we move the our camera view coord using glm::translate since all our coord is the same
+		*/
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 proj = glm::mat4(1.0f);
+
+		//move the coord (matrix to move, vec3 xyz of how much to move (+ is towards us))
+		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
+		
+		//to set our projection matrix(fov, aspect ratio, closest & farthest focal length)
+		proj = glm::perspective(glm::radians(45.04f), (float)(width / height), 0.1f, 100.0f);
+
+		//assign value of our matrices using uniform locator
+		//then send matrices to the active shaders
+		//use value ptr to point at the value instead of metadata
+		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+		int projLoc = glGetUniformLocation(shaderProgram.ID, "proj");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+
+
 		//to give the uniID a value
 		//must be after activate
 		glUniform1f(uniID, 0.5f);
@@ -213,7 +273,7 @@ int main() {
 		VAO1.Bind();
 
 		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 
