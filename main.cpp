@@ -131,7 +131,9 @@ int main() {
 		Then generate the texture, its mipmap and delete image data
 	*/
 	//defining height, width in pixels and color channel of an image
+	//and flip image cuz stb read from top left but opengl read from bottom left
 	int widthImg, heightImg, numColCh;
+	stbi_set_flip_vertically_on_load(true);
 
 	//storing image in array of byte
 	unsigned char* bytes = stbi_load("chad kilau.jpg", &widthImg, &heightImg, &numColCh, 0);
