@@ -52,7 +52,7 @@ GLfloat vertices[] =
 GLuint indices[] =
 {
 	0, 2, 1,	//upper triangle face
-	0, 3, 2		//lower triangle face
+	0, 3, 2		//lower triangle faces
 };
 
 int main() {
