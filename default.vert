@@ -28,6 +28,7 @@ out vec2 texCoord;
 uniform float scale;
 
 //import matrices into the vertex shader
+//Enables 3d viewing w/ perspective
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;

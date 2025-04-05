@@ -209,9 +209,16 @@ int main() {
 	glUniform1i(tex0uni, 0);
 
 
-
+	/*
+		Timer for model rotation
+	*/
 	float rotation = 0.0f;
 	double prevTime = glfwGetTime();
+
+	/*
+		Enabling Depth buffer 
+	*/
+	glEnable(GL_DEPTH_TEST);
 
 
 	/*
@@ -225,13 +232,13 @@ int main() {
 		*/
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT);
+		// Clean the back buffer bit and assign the new color to it, and clear depth buffer bit
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
 
-
+		// timer for model rotation
 		double crrntTime = glfwGetTime();
 		if (crrntTime - prevTime >= 1 / 60) {
 			rotation += 0.5f;
