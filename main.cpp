@@ -210,6 +210,9 @@ int main() {
 
 
 
+	float rotation = 0.0f;
+	double prevTime = glfwGetTime();
+
 
 	/*
 		Main loop of our program
@@ -229,6 +232,12 @@ int main() {
 		shaderProgram.Activate();
 
 
+		double crrntTime = glfwGetTime();
+		if (crrntTime - prevTime >= 1 / 60) {
+			rotation += 0.5f;
+			prevTime = crrntTime;
+		}
+
 		/*
 			For 3d projection
 
@@ -242,6 +251,9 @@ int main() {
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 proj = glm::mat4(1.0f);
+
+		//to rotate our model (model to modify, rotation in radians, axis of rotation)
+		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//move the coord (matrix to move, vec3 xyz of how much to move (+ is towards us))
 		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
