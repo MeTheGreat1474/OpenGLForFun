@@ -1,5 +1,6 @@
-#ifndef CAMERA_CLASS.h
-#define CAMERA_CLASS.h
+#ifndef CAMERA_CLASS_H
+#define CAMERA_CLASS_H
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include<glad/glad.h>
 #include<glfw/glfw3.h>
