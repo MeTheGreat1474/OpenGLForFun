@@ -18,6 +18,7 @@ Cleans up resources (e.g., shaders, VAOs, VBOs) before exiting.
 #include"VAO.h"
 #include"VBO.h"
 #include"EBO.h"
+#include"camera.h"
 
 //think shaders as function for GPU
 
@@ -32,6 +33,7 @@ const unsigned int height= 800;
 //opengl will auto interpolate color gradient
 //specify how we want to map the texture on the vertices (higher than 1 cause tiling)
 //Vertices coordinates
+//pyramid
 GLfloat vertices[] =
 { //     COORDINATES     /        COLORS      /   TexCoord  //
 	-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
@@ -41,8 +43,22 @@ GLfloat vertices[] =
 	 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
 };
 
+//cube
+//GLfloat vertices[] = {
+//	// Positions          // Colors           // Texture Coords
+//	-0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, // Bottom-left 0
+//	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  5.0f, 0.0f, // Bottom-right 1
+//	 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  5.0f, 5.0f, // Top-right 2
+//	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 5.0f, // Top-left 3
+//	 
+//	-0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, // Bottom-left 4
+//	 0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // Bottom-right 5
+//	 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f, // Top-right 6
+//	-0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f  // Top-left 7
+//};
 
 
+//old
 //GLfloat vertices[] =
 //{ //     COORDINATES     /        COLORS      /		TexCoord
 //	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f,// Lower left corner
@@ -63,7 +79,29 @@ GLfloat vertices[] =
 //};
 
 
-//tell openGL to draw 3 points together to form a triangle faces in the order specified here
+//GLuint indices[] = {
+//	// Back face
+//	0, 1, 2,
+//	2, 3, 0,
+//	// Front face
+//	4, 5, 6,
+//	6, 7, 4,
+//	// Left face
+//	0, 4, 7,
+//	7, 3, 0,
+//	// Right face
+//	1, 5, 6,
+//	6, 2, 1,
+//	// Bottom face
+//	0, 1, 5,
+//	5, 4, 0,
+//	// Top face
+//	3, 2, 6,
+//	6, 7, 3
+//};
+
+////tell openGL to draw 3 points together to form a triangle faces in the order specified here
+////pyramid
 GLuint indices[] =
 {
 	0, 1, 2,
@@ -74,6 +112,7 @@ GLuint indices[] =
 	3, 0, 4
 };
 
+//triangle
 //GLuint indices[] =
 //{
 //	0, 2, 1,	//upper triangle face
@@ -145,7 +184,7 @@ int main() {
 	/*
 		talks w/ the GL uniform variables that talks with shaders
 	*/
-	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
+	//GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
 
 
 	/*
@@ -212,13 +251,16 @@ int main() {
 	/*
 		Timer for model rotation
 	*/
-	float rotation = 0.0f;
-	double prevTime = glfwGetTime();
+	/*float rotation = 0.0f;
+	double prevTime = glfwGetTime();*/
 
 	/*
 		Enabling Depth buffer 
 	*/
 	glEnable(GL_DEPTH_TEST);
+
+
+	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
 
 	/*
@@ -238,12 +280,15 @@ int main() {
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
 
+		camera.Matrix(45.0f, 0.1f, 100.0f, shaderProgram, "camMatrix");
+
 		// timer for model rotation
-		double crrntTime = glfwGetTime();
+		//rotate on the specified time
+		/*double crrntTime = glfwGetTime();
 		if (crrntTime - prevTime >= 1 / 60) {
 			rotation += 0.5f;
 			prevTime = crrntTime;
-		}
+		}*/
 
 		/*
 			For 3d projection
@@ -255,35 +300,35 @@ int main() {
 			set all matrix use for transformation,
 			we move the our camera view coord using glm::translate since all our coord is the same
 		*/
-		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 proj = glm::mat4(1.0f);
+		//glm::mat4 model = glm::mat4(1.0f);
+		//glm::mat4 view = glm::mat4(1.0f);
+		//glm::mat4 proj = glm::mat4(1.0f);
 
-		//to rotate our model (model to modify, rotation in radians, axis of rotation)
-		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+		////to rotate our model (model to modify, rotation in radians, axis of rotation)
+		//model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		//move the coord (matrix to move, vec3 xyz of how much to move (+ is towards us))
-		view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
-		
-		//to set our projection matrix(fov, aspect ratio, closest & farthest focal length)
-		proj = glm::perspective(glm::radians(45.04f), (float)(width / height), 0.1f, 100.0f);
+		////move the coord (matrix to move, vec3 xyz of how much to move (+ is towards us))
+		//view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
+		//
+		////to set our projection matrix(fov, aspect ratio, closest & farthest focal length)
+		//proj = glm::perspective(glm::radians(45.04f), (float)(width / height), 0.1f, 100.0f);
 
-		//assign value of our matrices using uniform locator
-		//then send matrices to the active shaders
-		//use value ptr to point at the value instead of metadata
-		int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		////assign value of our matrices using uniform locator
+		////then send matrices to the active shaders
+		////use value ptr to point at the value instead of metadata
+		//int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-		int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		//int viewLoc = glGetUniformLocation(shaderProgram.ID, "view");
+		//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-		int projLoc = glGetUniformLocation(shaderProgram.ID, "proj");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+		//int projLoc = glGetUniformLocation(shaderProgram.ID, "proj");
+		//glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
 
 
 		//to give the uniID a value
 		//must be after activate
-		glUniform1f(uniID, 0.5f);
+		//glUniform1f(uniID, 0.5f);
 
 		//bind the texture object
 		glBindTexture(GL_TEXTURE_2D, textures);

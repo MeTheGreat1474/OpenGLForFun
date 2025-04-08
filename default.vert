@@ -23,9 +23,13 @@ layout (location = 2) in vec2 aTex;
 out vec3 color;
 out vec2 texCoord;
 
+
+uniform mat4 camMatrix;
+
+
 //dont define uniform if u dont use it
 // Controls the scale of the vertices
-uniform float scale;
+//uniform float scale;
 
 //import matrices into the vertex shader
 //Enables 3d viewing w/ perspective
@@ -41,6 +45,7 @@ void main()
 	// use for 3d
 	gl_Position = proj * view * model * vec4(aPos, 1.0);
 
+	//gl_Position = camMatrix * vec4(aPos, 1.0);
 
 	// Assigns the colors from the Vertex Data to "color"
 	color = aColor;
