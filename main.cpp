@@ -201,7 +201,7 @@ int main() {
 	stbi_set_flip_vertically_on_load(true);
 
 	//storing image in array of byte
-	unsigned char* bytes = stbi_load("towa.jpeg", &widthImg, &heightImg, &numColCh, 0);
+	unsigned char* bytes = stbi_load("brick.jpeg", &widthImg, &heightImg, &numColCh, 0);
 
 	GLuint textures;
 

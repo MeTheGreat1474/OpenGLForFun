@@ -81,5 +81,8 @@
     <Image Include="C:\Users\Ahmad Taufiq\Pictures\Saved Pictures\towa.jpeg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
+    <Image Include="C:\Users\Ahmad Taufiq\Downloads\brick.jpeg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>
